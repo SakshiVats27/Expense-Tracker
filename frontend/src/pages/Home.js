@@ -8,6 +8,8 @@ import LoadingBar from 'react-top-loading-bar';
 import { createExpense, getUserExpenses } from '../utils/renders';
 import NavBar from '../components/NavBar';
 
+
+
 function Home() {
   const navigate = useNavigate();
   const [selectDate, setSelectedDate] = useState('');
@@ -19,13 +21,25 @@ function Home() {
 
   document.title = 'Home';
 
-  // Function to fetch user expenses
-  const fetchExpenses = useCallback(async () => {
-    const data = await getUserExpenses(userData._id);
-    setUserExp(data);
-  }, [userData._id]);
+  const [loading, setLoading] = useState(true);
+const [error, setError] = useState(null);
 
-  // Redirect if not logged in and fetch user data
+
+
+const fetchExpenses = useCallback(async () => {
+  try {
+    setLoading(true);
+    const data = await getUserExpenses(userData._id);
+    setUserExp(data || []); // Ensure array
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}, [userData._id]);
+
+
+
   useEffect(() => {
     if (!userData) {
       navigate('/login');
@@ -35,8 +49,9 @@ function Home() {
   }, [navigate, userData, fetchExpenses]);
 
   const getTotal = () => {
-    return userExp.reduce((sum, item) => sum + item.amount, 0);
-  };
+  return (userExp || []).reduce((sum, item) => sum + (item?.amount || 0), 0);
+};
+  
 
   const handleCreateExpense = () => {
     if (!amount || !category || !selectDate) return;
@@ -59,75 +74,89 @@ function Home() {
   };
 
   return (
-    <div className="h-screen font-mont w-full bg-zinc-900">
-      <LoadingBar color="orange" ref={ref} />
+    <div className="min-h-screen font-mont bg-dark text-light">
+      <LoadingBar color="#FACC15" ref={ref} />
       <NavBar data={userExp} />
 
-      {/* Feed */}
-      <div className="Feed w-4/5 left-[calc(100%-90%)] relative h-[calc(100%-6rem)] flex">
-        {/* Left: Chart */}
-        <div className="leftbox w-1/2 h-full p-6">
-          <Chartss exdata={userExp} />
-        </div>
-
-        {/* Right: Create + List */}
-        <div className="rightbox flex flex-col gap-10 items-center w-1/2">
-          {/* Create Transaction */}
-          <div className="createnew bg-gray-800 rounded-3xl p-10 pt-6 pb-6 flex flex-col justify-center items-center gap-2 relative top-5">
-            <div className="font-bold text-3xl text-white">Create Transaction</div>
-            <div className="flex flex-row gap-4">
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(Number(e.target.value))}
-                placeholder="Amount"
-                className="h-12 text-base placeholder-black p-4 rounded-xl outline-none focus:focus-animation"
-              />
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl p-2.5 focus:focus-animation"
-              >
-                <option value="">--Select--</option>
-                <option value="Grocery">Grocery</option>
-                <option value="Vehicle">Vehicle</option>
-                <option value="Shopping">Shopping</option>
-                <option value="Travel">Travel</option>
-                <option value="Food">Food</option>
-                <option value="Fun">Fun</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div className="grid grid-flow-col w-full gap-4 mt-2">
-              <DatePicker
-                selected={selectDate}
-                onChange={(date) => setSelectedDate(date)}
-                className="p-3 placeholder-black w-full rounded-xl outline-none bg-white px-4 text-black"
-                placeholderText="Date"
-                showYearDropdown
-              />
-              <button
-                onClick={handleCreateExpense}
-                className="relative text-center w-full rounded-xl px-5 py-2 overflow-hidden group bg-gray-800 border-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-indigo-600 text-white hover:ring-2 hover:ring-offset-2 hover:ring-indigo-600 transition-all ease-out duration-300"
-              >
-                <span className="absolute right-0 w-8 h-10 -mt-12 transition-all duration-1000 transform translate-x-12 bg-white opacity-10 rotate-12 group-hover:-translate-x-40 ease"></span>
-                <span className="relative font-bold text-2xl">+</span>
-              </button>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 sm:px-6 py-8">
+        {/* Responsive Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Chart Section */}
+          <div className="lg:sticky lg:top-8 h-full">
+            <div className="bg-white/10 rounded-2xl p-6 h-full">
+              <Chartss exdata={userExp} />
             </div>
           </div>
 
-          {/* Transaction List */}
-          <div className="w-5/6 p-7 relative rounded-xl h-auto border-white border-2 grid gap-7 overflow-y-scroll max-h-[400px]">
-            <div className="text-3xl text-white font-bold">Total Expense: ₹ {getTotal()}</div>
-            <div className="grid grid-cols-2 listrr gap-7">
-              {userExp.map((item) => (
-                <Items key={item._id} data={item} />
-              ))}
+          {/* Transaction Section */}
+          <div className="space-y-8">
+            {/* Create Transaction Card */}
+            <div className="bg-white/5 rounded-2xl p-6 backdrop-blur-sm">
+              <h2 className="text-2xl font-bold mb-6 text-center">Create Transaction</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(Number(e.target.value))}
+                  placeholder="Amount"
+                  className="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-primary text-dark"
+                />
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-purple/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-primary text-dark"
+                >
+                  <option value="">--Select Category--</option>
+                  <option value="Grocery">Grocery</option>
+                  <option value="Vehicle">Vehicle</option>
+                  <option value="Shopping">Shopping</option>
+                  <option value="Travel">Travel</option>
+                  <option value="Food">Food</option>
+                  <option value="Fun">Fun</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div className="flex flex-col md:flex-row gap-4 mt-2">
+              <div className="relative w-full">
+              
+                <DatePicker
+                  selected={selectDate}
+                  onChange={(date) => setSelectedDate(date)}
+                  className="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-primary text-white"
+                  placeholderText="Select Date"
+                  showYearDropdown
+                  popperPlacement="bottom-start"
+  portalId="calendar-portal"
+                  
+    />
+                 </div>
+                <button
+                  onClick={handleCreateExpense}
+                  className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 "
+                >
+                  <span className="text-2xl">+</span>
+                  <span>Add Expense</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Transactions List */}
+            <div className="bg-white/5 rounded-2xl p-6 mt-4">
+              <h2 className="text-2xl font-bold mb-6">Total Expense: ₹ {getTotal()}</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
+                {userExp.map((item) => (
+                  <Items key={item._id} data={item} />
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
+
+    
   );
 }
 

@@ -1,109 +1,105 @@
-*{
-  padding: 0;
-  margin : 0;
-  box-sizing: border-box;
-}
+@import url('https://fonts.googleapis.com/css2?family=Handjet:wght@500&family=Montserrat:wght@400;500;600&display=swap');
 
-  @import url('https://fonts.googleapis.com/css2?family=Handjet:wght@500&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Handjet:wght@500&family=Montserrat&display=swap');
-.font-bold{
-  font-weight: 300;
-}
-
-.font-mont{
-  font-family: 'Handjet', cursive;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.font-handjet{
- font-family: 'Handjet', cursive;
-}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-input[type="date"]{
-  background-color: white;
-  padding: 15px;
-  
-  /* transform: translate(-50%,-50%); */
-  height: 45px;
-
-  font-family: "Roboto Mono",monospace;
-  color: black;
-  font-size: 18px;
-  border: none;
-  outline: none;
-  border-radius: 15px;
-}
-::-webkit-calendar-picker-indicator{
-  background-color: blue;
-  padding: 7px;
-  cursor: pointer;
-  border-radius: 10px;
-}
-/* Firefox */
+/* Base Reset */
 * {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
   scrollbar-width: thin;
-  scrollbar-color: #A38426 #CBD4D7;
+  scrollbar-color: theme('colors.secondary.DEFAULT') theme('colors.light');
 }
 
-/* Chrome, Edge and Safari */
-*::-webkit-scrollbar {
-  width: 10px;
-  width: 10px;
+/* Scrollbar Styling (Cross-browser) */
+::-webkit-scrollbar {
+  @apply w-2;
 }
-*::-webkit-scrollbar-track {
-  border-radius: 8px;
-  background-color: #CBD4D7;
+::-webkit-scrollbar-track {
+  @apply bg-light rounded-lg;
 }
-
-*::-webkit-scrollbar-track:hover {
-  background-color: #D5DEE0;
+::-webkit-scrollbar-thumb {
+  @apply bg-secondary-dark rounded-lg hover:bg-secondary-light;
 }
 
-*::-webkit-scrollbar-track:active {
-  background-color: #B8C0C2;
+/* Typography */
+body {
+  @apply font-sans bg-light text-dark antialiased;
 }
 
-*::-webkit-scrollbar-thumb {
-  border-radius: 4px;
-  background-color: #A38426;
+.font-bold {
+  @apply font-semibold; /* More consistent with design systems */
 }
 
-*::-webkit-scrollbar-thumb:hover {
-  background-color: #DFCD42;
+.font-mont {
+  font-family: 'Montserrat', sans-serif;
 }
 
-*::-webkit-scrollbar-thumb:active {
-  background-color: #DFCD42;
+.font-handjet {
+  font-family: 'Handjet', cursive;
 }
+
+/* Form Elements */
+input[type="date"],
+input[type="number"] {
+  @apply bg-white p-4 h-11 font-mono text-lg border-none rounded-xl 
+         focus:ring-2 focus:ring-primary-light focus:border-transparent;
+}
+
+/* Remove number input spinners */
 input::-webkit-outer-spin-button,
-      input::-webkit-inner-spin-button {
-        display: none;
-      }
+input::-webkit-inner-spin-button {
+  @apply appearance-none m-0;
+}
 
-@layer components{
+/* Date picker indicator */
+::-webkit-calendar-picker-indicator {
+  @apply bg-primary-light py-1.5 cursor-pointer rounded-lg 
+         hover:bg-primary-dark transition-colors;
+}
 
-  .focus-animation{
-    @apply  focus:outline-dashed focus:outline-2 transition-all focus:outline-offset-4 focus:outline-white ;
+/* Custom Components */
+@layer components {
+  .focus-animation {
+    @apply focus:outline-dashed focus:outline-2 focus:outline-offset-4 
+           focus:outline-white transition-all duration-200;
+  }
+  
+  .category {
+    @apply bg-white text-black w-fit px-2 py-0.5;
   }
 }
 
-@media (max-width:1085px){
-  .smr{
+/* Responsive Layouts */
+@media (max-width: 1085px) {
+  .smr {
     @apply grid grid-flow-row gap-2 justify-center;
   }
-  .category{
-    @apply bg-white text-black w-fit p-0.5 pl-2 pr-2 ;
+}
+
+@media (max-width: 940px) {
+  .listrr {
+    @apply grid-cols-1;
+  }
+  
+  .flexing {
+    @apply flex-col;
   }
 }
 
-@media (max-width:940px){
-  .listrr{
-    @apply grid-cols-1 ;
-  }
-  .flexing{
-    @apply flex-col ;
+/* Responsive Typography */
+@media (max-width: 768px) {
+  html {
+    font-size: 95%; /* Slightly reduce base font size for mobile */
   }
 }
+
+/* Fixes calendar popup being inside layout flow */
+.custom-calendar {
+  position: absolute !important;
+  z-index: 50 !important;
+  margin-top: 0.5rem; /* Small space below input */
+}
+
