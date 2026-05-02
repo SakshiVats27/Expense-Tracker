@@ -15,6 +15,10 @@ securityMiddleware(app);
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("Expense Tracker Backend Running");
+});
+
 app.use('/auth', userRouter);
 app.use('/expenses', expenseRouter);
 app.use('/budget', budgetRouter);
