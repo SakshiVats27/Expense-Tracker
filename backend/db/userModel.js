@@ -10,19 +10,21 @@ const userSchema = new mongoose.Schema({
         unique : true
     },
     password : {
-        type : String,
+        type : String ,
         required : true,
     },
-    expense_id:[{
-        type :  mongoose.Schema.Types.ObjectId,
-        ref : 'expenses'
-    }],
-    
-
-},{
+    refreshToken: {
+        type: String,
+        select: false
+    },
+    lastRecurringCheck: {
+        type: Date,
+        default: Date.now
+    }
+    },{
     timestamps : true,
 })
 
-const userModel = mongoose.model('users' , userSchema);
+const userModel = mongoose.model('User' , userSchema);
 
 module.exports = userModel;

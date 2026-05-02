@@ -10,7 +10,7 @@
   margin: 0;
   box-sizing: border-box;
   scrollbar-width: thin;
-  scrollbar-color: theme('colors.secondary.DEFAULT') theme('colors.light');
+  scrollbar-color: theme('colors.primary.DEFAULT') theme('colors.slate.800');
 }
 
 /* Scrollbar Styling (Cross-browser) */
@@ -18,15 +18,16 @@
   @apply w-2;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-light rounded-lg;
+  @apply bg-slate-900 rounded-lg;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-secondary-dark rounded-lg hover:bg-secondary-light;
+  @apply bg-emerald-500 rounded-lg hover:bg-emerald-600;
 }
 
 /* Typography */
 body {
-  @apply font-sans bg-light text-dark antialiased;
+  @apply font-sans bg-slate-950 text-slate-100 antialiased min-h-screen;
+  overflow-x: hidden;
 }
 
 .font-bold {
@@ -44,8 +45,9 @@ body {
 /* Form Elements */
 input[type="date"],
 input[type="number"] {
-  @apply bg-white p-4 h-11 font-mono text-lg border-none rounded-xl 
+  @apply h-11 font-mono text-base sm:text-lg border-none rounded-xl 
          focus:ring-2 focus:ring-primary-light focus:border-transparent;
+  max-width: 100%;
 }
 
 /* Remove number input spinners */
@@ -58,6 +60,15 @@ input::-webkit-inner-spin-button {
 ::-webkit-calendar-picker-indicator {
   @apply bg-primary-light py-1.5 cursor-pointer rounded-lg 
          hover:bg-primary-dark transition-colors;
+}
+
+.react-datepicker-wrapper,
+.react-datepicker__input-container {
+  width: 100%;
+}
+
+.react-datepicker-popper {
+  z-index: 80 !important;
 }
 
 /* Custom Components */
@@ -94,6 +105,10 @@ input::-webkit-inner-spin-button {
   html {
     font-size: 95%; /* Slightly reduce base font size for mobile */
   }
+
+  .react-datepicker {
+    max-width: calc(100vw - 2rem);
+  }
 }
 
 /* Fixes calendar popup being inside layout flow */
@@ -101,5 +116,14 @@ input::-webkit-inner-spin-button {
   position: absolute !important;
   z-index: 50 !important;
   margin-top: 0.5rem; /* Small space below input */
+}
+
+@keyframes undo-timer {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.animate-undo-timer {
+  animation: undo-timer 5s linear forwards;
 }
 

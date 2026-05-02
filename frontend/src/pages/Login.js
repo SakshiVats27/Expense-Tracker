@@ -16,8 +16,11 @@ function Login() {
 
   // Prevent logged-in users from accessing login page
   useEffect(() => {
-    if (localStorage.getItem("User")) {
-      navigate("/");
+    if (!localStorage.getItem("User")) {
+      setEmail('');
+      setPassword('');
+    } else {
+      navigate("/"); // Redirect if already logged in
     }
   }, [navigate]);
 
@@ -37,17 +40,25 @@ function Login() {
         password
       });
 
-      if (response.data.statusCode !== 201) {
-        toast.error(response.data.message);
+      if (response.data.statusCode !== 200) {
+        toast.error(response.data.message || "Login failed");
+        // Clear fields on login failure (non-200 status)
+        setEmail('');
+        setPassword('');
         return;
       }
 
-      toast.success("Login successful!");
-      localStorage.setItem('User', JSON.stringify(response.data.message));
-      ref.current.complete();
-      navigate('/');
+      toast.success("Login successful");
+      const { accessToken, refreshToken, user } = response.data.message; 
+      localStorage.setItem('token', accessToken);
+      localStorage.setItem('refreshToken', refreshToken); 
+      localStorage.setItem('User', JSON.stringify(user));      ref.current.complete();
+      setTimeout(() => navigate('/'), 650);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
+      toast.error(error.response?.data?.message || "Login failed. Please check your email and password.");
+      // Clear fields on login failure (catch block)
+      setEmail('');
+      setPassword('');
       console.error("Login error:", error);
     } finally {
       setIsLoading(false);
@@ -102,7 +113,7 @@ function Login() {
               <input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent text-white placeholder-gray-400 transition-all"

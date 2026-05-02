@@ -9,14 +9,14 @@ module.exports = {
       colors: {
         // Modern color palette with better contrast
         primary: {
-          light: '#8B5CF6',  // lighter purple
-          DEFAULT: '#7C3AED', // your existing brand purple
-          dark: '#6D28D9'     // darker purple
+          light: '#34D399',  // emerald-400
+          DEFAULT: '#10B981', // emerald-500
+          dark: '#059669'     // emerald-600
         },
         secondary: {
-          light: '#FDE047',   // lighter yellow
-          DEFAULT: '#FACC15', // your existing brand yellow
-          dark: '#EAB308'     // darker yellow
+          light: '#818CF8',   // indigo-400
+          DEFAULT: '#6366F1', // indigo-500
+          dark: '#4F46E5'     // indigo-600
         },
         // Additional colors for complete palette
         accent: '#EC4899',    // pink accent

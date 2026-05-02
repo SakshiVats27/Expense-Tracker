@@ -68,11 +68,17 @@ function Signup() {
         return;
       }
 
-      toast.success("Registered successfully!");
+      toast.success("Registration successful");
       ref.current.complete();
-      navigate("/login");
+      // Clear form fields after successful registration
+      setFormData({
+        username: '',
+        email: '',
+        password: ''
+      });
+      setTimeout(() => navigate("/login"), 650);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed");
+      toast.error(error.response?.data?.message || "Registration failed. Please try again later.");
       console.error("Signup error:", error);
     } finally {
       setIsLoading(false);
@@ -155,7 +161,7 @@ function Signup() {
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
                   className={`w-full pl-10 pr-4 py-3 rounded-lg bg-white/5 border ${errors.password ? 'border-red-500' : 'border-white/10'} focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent text-white placeholder-gray-400 transition-all`}
@@ -180,8 +186,8 @@ function Signup() {
 
             <div className="text-center text-gray-400">
               Already have an account?{' '}
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="text-secondary hover:text-secondary-dark font-medium transition-colors"
               >
                 Log in here
