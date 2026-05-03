@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const budgetModel = require('../db/budgetModel');
+const budgetService = require('../services/budgetService'); // Import budgetService
 const { error, success } = require('../utils/handler');
 
 const getBudget = async (req, res) => {
@@ -64,7 +65,21 @@ const updateBudget = async (req, res) => {
     }
 };
 
+// New controller function for resetting budget
+const resetBudget = async (req, res) => {
+    try {
+        const userId = new mongoose.Types.ObjectId(req.user.userId);
+        // Call the service function to reset budgets
+        await budgetService.resetBudget(userId); 
+        return res.status(200).json(success(200, "Budgets reset successfully"));
+    } catch (e) {
+        console.error("Backend Budget Reset Error:", e.message);
+        return res.status(500).json(error(500, e.message));
+    }
+};
+
 module.exports = {
     getBudget,
-    updateBudget
+    updateBudget,
+    resetBudget // Export the new controller function
 };

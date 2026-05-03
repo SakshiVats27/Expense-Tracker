@@ -13,9 +13,14 @@ const app = express();
 securityMiddleware(app);
 
 app.use(cors({
-  origin: "https://expense-tracker-khaki-eta-31.vercel.app",
+  origin: [
+    "http://localhost:3000",
+    "https://expense-tracker-khaki-eta-31.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+app.options("*", cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
