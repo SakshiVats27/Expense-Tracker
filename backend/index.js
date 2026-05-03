@@ -12,7 +12,10 @@ const app = express();
 
 securityMiddleware(app);
 
-app.use(cors());
+app.use(cors({
+  origin: "https://expense-tracker-khaki-eta-31.vercel.app",
+  credentials: true
+}));
 app.use(express.json());
 
 app.get("/", (req, res) => {
