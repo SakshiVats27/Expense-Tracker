@@ -2,6 +2,10 @@ const userModel = require('../db/userModel');
 const { error, success } = require('../utils/handler');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const emailSend = require('../utils/emailSend');
+
+const getFrontendUrl = (req) => (process.env.FRONTEND_URL || req.headers.origin || "http://localhost:3000").replace(/\/$/, '');
 
 const signupController = async (req, res) => {
   try {
@@ -110,9 +114,94 @@ const refreshTokenController = async (req, res) => {
   }
 };
 
+const forgotPasswordController = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json(error(400, "Email is required"));
+    }
+
+    const user = await userModel.findOne({ email }).select('+passwordResetToken +passwordResetExpires');
+
+    if (!user) {
+      return res.status(200).json(success(200, "If an account exists, a password reset link has been sent"));
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+    await user.save();
+
+    const resetUrl = `${getFrontendUrl(req)}/reset-password/${resetToken}`;
+    const message = [
+      "You requested a password reset for your Expense Tracker account.",
+      `Use this link to set a new password: ${resetUrl}`,
+      "This link expires in 15 minutes. If you did not request this, you can ignore this email."
+    ].join('\n\n');
+
+    try {
+      await emailSend({
+        email: user.email,
+        subject: 'Reset your Expense Tracker password',
+        message
+      });
+    } catch (mailError) {
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save();
+      console.error("Password reset email error:", mailError);
+      return res.status(500).json(error(500, "Could not send reset email. Please try again later."));
+    }
+
+    return res.status(200).json(success(200, "If an account exists, a password reset link has been sent"));
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    return res.status(500).json(error(500, err.message));
+  }
+};
+
+const resetPasswordController = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json(error(400, "Reset token and new password are required"));
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json(error(400, "Password must be at least 6 characters"));
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await userModel.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() }
+    }).select('+password +passwordResetToken +passwordResetExpires +refreshToken');
+
+    if (!user) {
+      return res.status(400).json(error(400, "Password reset link is invalid or has expired"));
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    user.refreshToken = undefined;
+    await user.save();
+
+    return res.status(200).json(success(200, "Password reset successfully. Please log in with your new password"));
+  } catch (err) {
+    console.error("Reset password error:", err);
+    return res.status(500).json(error(500, err.message));
+  }
+};
+
 module.exports = {
   loginController,
   logoutController,
   signupController,
   refreshTokenController,
+  forgotPasswordController,
+  resetPasswordController,
 };

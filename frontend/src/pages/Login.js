@@ -120,6 +120,14 @@ function Login() {
                 required
                 minLength="6"
               />
+              <div className="mt-2 text-right">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-secondary hover:text-secondary-dark font-medium transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             <button
